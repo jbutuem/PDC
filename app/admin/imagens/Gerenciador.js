@@ -4,12 +4,25 @@ import { useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { registrarImagem, moverFoco, apagarImagem } from './acoes';
+import { prepararImagem } from '@/lib/imagem';
 
 const SPEC = {
-  produto:  { rot: 'Produto',  prop: 'quadrada 1:1',   min: '800 × 800 px',   dica: 'Miniatura na vitrine de pizzas e nas listagens.' },
-  destaque: { rot: 'Destaque', prop: '3:2 a 2,4:1',    min: '1800 × 1200 px', dica: 'Bloco que rompe a margem dentro da seção.' },
-  hero:     { rot: 'Hero',     prop: '4:5 a 2,6:1',    min: '2400 × 1000 px', dica: 'Topo do menu. Precisa de ar em volta do produto.' },
-  promo:    { rot: 'Promoção', prop: '4:3',            min: '1200 × 900 px',  dica: 'Card da faixa. Texto entra por baixo.' }
+  produto: {
+    rot: 'Produto', prop: 'quadrada 1:1', min: '800 × 800 px',
+    dica: 'Miniatura na linha do item e na vitrine de pizzas.'
+  },
+  destaque: {
+    rot: 'Destaque', prop: 'envie em 3:2 (paisagem)', min: '1800 × 1200 px',
+    dica: 'Bloco que rompe a margem. O desktop recorta uma faixa 2,4:1 do meio — deixe ar em cima e embaixo.'
+  },
+  hero: {
+    rot: 'Hero', prop: 'envie em 4:5 (retrato)', min: '2400 × 3000 px',
+    dica: 'O celular usa a imagem inteira em retrato; o desktop recorta uma faixa 2,6:1 do meio. Por isso ela precisa ser alta, não larga.'
+  },
+  promo: {
+    rot: 'Promoção', prop: '4:3 (paisagem)', min: '1200 × 900 px',
+    dica: 'Card da faixa "Esta semana". O texto entra sobre a metade de baixo — deixe essa área limpa.'
+  }
 };
 
 export default function Gerenciador({ imagens, itens, urlBase, podeEditar }) {
@@ -30,42 +43,31 @@ export default function Gerenciador({ imagens, itens, urlBase, podeEditar }) {
     setMsg(null);
 
     try {
-      const img = await new Promise((ok, erro) => {
-        const i = new Image();
-        i.onload = () => ok(i);
-        i.onerror = () => erro(new Error('Não consegui ler a imagem.'));
-        i.src = URL.createObjectURL(f);
-      });
-
-      const menor = Math.min(img.width, img.height);
-      const minimo = papel === 'hero' ? 1000 : papel === 'destaque' ? 1200 : 800;
-      if (menor < minimo) {
-        setMsg({ tipo: 'mel', texto: `Imagem de ${img.width}×${img.height}. O papel "${spec.rot}" pede pelo menos ${spec.min}. Ela vai subir, mas pode ficar borrada em tela grande.` });
-      }
+      const pronta = await prepararImagem(f, papel);
 
       const sb = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
       );
 
-      const ext = (f.name.split('.').pop() ?? 'jpg').toLowerCase();
-      const caminho = `${papel}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-
-      const { error } = await sb.storage.from('menu').upload(caminho, f, {
-        cacheControl: '31536000', upsert: false
-      });
-      if (error) throw error;
+      const caminho = `${papel}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const { error } = await sb.storage.from('menu')
+        .upload(caminho, pronta.blob, { cacheControl: '31536000', contentType: 'image/jpeg' });
+      if (error) throw new Error(error.message);
 
       await registrarImagem({
         storage_path: caminho, papel, item_id: itemId || null,
-        largura: img.width, altura: img.height, alt: f.name.replace(/\.[^.]+$/, '')
+        largura: pronta.largura, altura: pronta.altura,
+        alt: pronta.nome.replace(/\.[^.]+$/, '')
       });
 
-      setMsg(m => m ?? { tipo: 'info', texto: 'Imagem enviada. Clique sobre ela para marcar o ponto de foco.' });
+      setMsg(pronta.aviso
+        ? { tipo: 'mel', texto: pronta.aviso }
+        : { tipo: 'info', texto: 'Imagem enviada. Clique sobre ela para marcar o ponto de foco.' });
       setItemId('');
       router.refresh();
     } catch (err) {
-      setMsg({ tipo: 'risco', texto: `Falha no envio: ${err.message}` });
+      setMsg({ tipo: 'risco', texto: err.message });
     }
     setEnviando(false);
     if (arquivo.current) arquivo.current.value = '';

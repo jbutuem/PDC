@@ -4,16 +4,35 @@ import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { registrarImagem, apagarImagem, moverFoco } from '@/app/admin/imagens/acoes';
+import { prepararImagem, formatarTamanho } from '@/lib/imagem';
 
 /**
  * Foto do item, editável na própria linha da tabela.
  * Antes isto só existia na tela de Imagens, o que obrigava a pessoa a sair
  * do lugar onde estava trabalhando para subir uma foto.
  */
+const ROTULO = {
+  preparando: 'Preparando…',
+  enviando: 'Enviando…',
+  salvando: 'Salvando…'
+};
+
+/** Mensagens do Storage vêm em inglês; aqui viram algo acionável. */
+function traduzir(msg = '') {
+  if (/exceeded the maximum allowed size/i.test(msg))
+    return 'A imagem ficou grande demais mesmo depois de reduzida. Tente uma foto menor.';
+  if (/mime type/i.test(msg))
+    return 'Formato não aceito. Envie JPEG ou PNG.';
+  if (/already exists/i.test(msg))
+    return 'Já existe um arquivo com esse nome. Tente de novo.';
+  return msg;
+}
+
 export default function FotoItem({ item, urlBase, podeEditar }) {
   const router = useRouter();
   const arquivo = useRef(null);
   const [ocupado, setOcupado] = useState(false);
+  const [passo, setPasso] = useState('');
   const [erro, setErro] = useState(null);
 
   const foto = item.imagem;
@@ -25,40 +44,35 @@ export default function FotoItem({ item, urlBase, podeEditar }) {
     setErro(null);
 
     try {
-      const img = await new Promise((ok, falha) => {
-        const i = new Image();
-        i.onload = () => ok(i);
-        i.onerror = () => falha(new Error('Arquivo não é uma imagem válida.'));
-        i.src = URL.createObjectURL(f);
-      });
+      setPasso('preparando');
+      const pronta = await prepararImagem(f, 'produto');
 
+      setPasso('enviando');
       const sb = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
       );
 
-      const ext = (f.name.split('.').pop() ?? 'jpg').toLowerCase();
-      const caminho = `produto/${item.codigo_pdv}-${Date.now()}.${ext}`;
-
+      const caminho = `produto/${item.codigo_pdv}-${Date.now()}.jpg`;
       const { error } = await sb.storage.from('menu')
-        .upload(caminho, f, { cacheControl: '31536000', upsert: false });
-      if (error) throw error;
+        .upload(caminho, pronta.blob, { cacheControl: '31536000', contentType: 'image/jpeg' });
+      if (error) throw new Error(traduzir(error.message));
 
       if (foto) await apagarImagem(foto.id, foto.storage_path);
 
+      setPasso('salvando');
       await registrarImagem({
         storage_path: caminho, papel: 'produto', item_id: item.id,
-        largura: img.width, altura: img.height, alt: item.nome
+        largura: pronta.largura, altura: pronta.altura, alt: item.nome
       });
 
-      if (Math.min(img.width, img.height) < 800) {
-        setErro(`Enviada com ${img.width}×${img.height}. O ideal é pelo menos 800×800 — pode ficar borrada.`);
-      }
+      if (pronta.aviso) setErro(pronta.aviso);
       router.refresh();
     } catch (err) {
       setErro(err.message);
     }
     setOcupado(false);
+    setPasso('');
     if (arquivo.current) arquivo.current.value = '';
   }
 
@@ -95,13 +109,15 @@ export default function FotoItem({ item, urlBase, podeEditar }) {
           )}
         </>
       ) : (
-        <button type="button" className="foto-vazia" disabled={!podeEditar || ocupado}
+        <button type="button" className={'foto-vazia' + (ocupado ? ' ocupada' : '')}
+                disabled={!podeEditar || ocupado}
                 onClick={() => arquivo.current?.click()}>
-          {ocupado ? '…' : '+ foto'}
+          {ocupado ? <span className="girando" /> : '+ foto'}
         </button>
       )}
       <input ref={arquivo} type="file" accept="image/*" hidden onChange={enviar} />
-      {erro && <span className="foto-erro">{erro}</span>}
+      {ocupado && <span className="foto-passo">{ROTULO[passo] ?? 'Enviando…'}</span>}
+      {erro && !ocupado && <span className="foto-erro">{erro}</span>}
     </div>
   );
 }
