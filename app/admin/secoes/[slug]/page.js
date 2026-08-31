@@ -18,12 +18,13 @@ export default async function PaginaSecao({ params }) {
 
   const { data: brutos } = await sb
     .from('itens')
-    .select('id, codigo_pdv, nome, descricao, tags, status, esgotado, ordem, variantes ( id, rotulo, ordem, precos ( valor_centavos, vigencia_fim, vigencia_inicio ) )')
+    .select('id, codigo_pdv, nome, descricao, tags, status, esgotado, ordem, variantes ( id, rotulo, ordem, precos ( valor_centavos, vigencia_fim, vigencia_inicio ) ), imagens ( id, storage_path, papel, foco_x, foco_y )')
     .eq('secao_id', secao.id)
     .order('ordem');
 
   const itens = (brutos ?? []).map(i => ({
     ...i,
+    imagem: (i.imagens ?? []).find(x => x.papel === 'produto') ?? null,
     variantes: (i.variantes ?? []).sort((a, b) => a.ordem - b.ordem).map(v => {
       const vig = (v.precos ?? [])
         .filter(p => !p.vigencia_fim)
@@ -35,6 +36,8 @@ export default async function PaginaSecao({ params }) {
   const todos = itens.flatMap(i => i.variantes.map(v => v.preco)).filter(Boolean);
   const media = todos.length > 3 ? todos.reduce((a, b) => a + b, 0) / todos.length : null;
   const rascunhos = itens.filter(i => i.status === 'rascunho').length;
+  const semFoto = itens.filter(i => !i.imagem).length;
+  const urlBase = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu`;
 
   return (
     <div className="adm-wrap">
@@ -50,8 +53,19 @@ export default async function PaginaSecao({ params }) {
         {media && ` · média da seção R$ ${(media / 100).toFixed(2).replace('.', ',')}`}
       </p>
 
+      <div className="atalhos">
+        <span>
+          <b>{semFoto === 0 ? 'Todos os itens têm foto.' : `${semFoto} de ${itens.length} itens sem foto.`}</b>{' '}
+          Clique em <b>+ foto</b> na linha do item para subir. Depois clique sobre a
+          miniatura para marcar o ponto de foco — é ele que decide o corte em cada tela.
+        </span>
+        <Link href="/admin/imagens" className="bt g mini" style={{ marginLeft: 'auto' }}>
+          Hero e banners →
+        </Link>
+      </div>
+
       <Editor
-        secao={secao} itens={itens} mediaSecao={media}
+        secao={secao} itens={itens} mediaSecao={media} urlBase={urlBase}
         podeEditar={PODE_EDITAR.includes(s.membro.papel)}
       />
     </div>

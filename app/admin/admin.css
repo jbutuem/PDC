@@ -72,9 +72,13 @@
 .campo:focus{outline:2px solid var(--forno);outline-offset:-1px}
 textarea.campo{min-height:52px;resize:vertical;line-height:1.4}
 
-.tag{font-size:9.5px;font-weight:700;letter-spacing:.07em;padding:2px 6px;
-  border-radius:3px;border:1px solid currentColor;white-space:nowrap;display:inline-block}
-.tag.veg{color:var(--ok)} .tag.esg{color:var(--geleia)} .tag.rasc{color:var(--t40)}
+.adm .tag{font-size:9.5px;font-weight:700;letter-spacing:.07em;padding:2px 6px;
+  border-radius:3px;border:1px solid currentColor;white-space:nowrap;
+  display:inline-block;width:auto;height:auto;background:none;vertical-align:middle}
+.adm .tag.veg{color:var(--ok)}
+.adm .tag.esg{color:var(--geleia)}
+.adm .tag.rasc{color:var(--t40)}
+.adm-tab td .estado{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
 
 /* ---------- botões ---------- */
 .bt{padding:9px 15px;border-radius:4px;font-size:13.5px;font-weight:600;
@@ -159,3 +163,27 @@ textarea.campo{min-height:52px;resize:vertical;line-height:1.4}
   .adm-wrap{padding:18px 14px 60px}
   .adm-tab{display:block;overflow-x:auto;white-space:nowrap}
 }
+
+/* ---------- foto na linha do item ---------- */
+.foto-cel{display:flex;flex-direction:column;gap:5px;align-items:flex-start;width:76px}
+.foto-mini{width:66px;height:66px;border-radius:4px;overflow:hidden;position:relative;
+  background:var(--pedra);cursor:crosshair;border:1px solid var(--fio);flex:0 0 auto}
+.foto-mini img{width:100%;height:100%;object-fit:cover;display:block}
+.foto-mini .alvo{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;
+  border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1.5px rgba(0,0,0,.55);pointer-events:none}
+.foto-bts{display:flex;gap:7px}
+.foto-bts button{background:none;border:0;padding:0;font-size:10.5px;color:var(--forno);
+  cursor:pointer;text-decoration:underline;font-weight:600}
+.foto-bts button:disabled{opacity:.4;cursor:not-allowed}
+.foto-vazia{width:66px;height:66px;border-radius:4px;cursor:pointer;font-size:11px;
+  font-weight:600;color:var(--t40);border:1px dashed var(--pedra);
+  background:repeating-linear-gradient(135deg,#EDE4D8,#EDE4D8 6px,#F5EEE5 6px,#F5EEE5 12px)}
+.foto-vazia:hover:not(:disabled){border-color:var(--forno);color:var(--forno)}
+.foto-vazia:disabled{cursor:not-allowed;opacity:.6}
+.foto-erro{font-size:10.5px;color:var(--geleia);line-height:1.3;max-width:150px}
+
+/* ---------- atalhos do topo da seção ---------- */
+.atalhos{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding:13px 15px;
+  background:var(--branco);border:1px solid var(--fio);border-radius:5px;
+  align-items:center;font-size:12.5px;color:var(--t70)}
+.atalhos b{color:var(--tinta)}

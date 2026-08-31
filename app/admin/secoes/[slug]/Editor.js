@@ -3,10 +3,11 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { salvarSecao, alternarEsgotado } from '@/app/admin/acoes';
+import FotoItem from './FotoItem';
 
 const brl = c => (c / 100).toFixed(2).replace('.', ',');
 
-export default function Editor({ secao, itens, mediaSecao, podeEditar }) {
+export default function Editor({ secao, itens, mediaSecao, podeEditar, urlBase }) {
   const router = useRouter();
   const [pendente, comecar] = useTransition();
   const [msg, setMsg] = useState(null);
@@ -120,7 +121,8 @@ export default function Editor({ secao, itens, mediaSecao, podeEditar }) {
       <table className="adm-tab">
         <thead>
           <tr>
-            <th style={{ width: '48%' }}>Item</th>
+            <th style={{ width: 84 }}>Foto</th>
+            <th style={{ width: '44%' }}>Item</th>
             <th>Código</th>
             {itens[0]?.variantes.map(v => (
               <th key={v.id} style={{ textAlign: 'right' }}>{v.rotulo === 'unica' ? 'Preço' : v.rotulo}</th>
@@ -131,6 +133,9 @@ export default function Editor({ secao, itens, mediaSecao, podeEditar }) {
         <tbody>
           {itens.map(i => (
             <tr key={i.id}>
+              <td>
+                <FotoItem item={i} urlBase={urlBase} podeEditar={podeEditar} />
+              </td>
               <td>
                 <input
                   className="campo" value={valores[`nome_${i.id}`]} disabled={!podeEditar}
@@ -178,17 +183,20 @@ export default function Editor({ secao, itens, mediaSecao, podeEditar }) {
                 </td>
               ))}
               <td>
-                {i.tags?.includes('vegetariano') && <span className="tag veg">VEG</span>}{' '}
-                {i.status === 'rascunho' && <span className="tag rasc">RASCUNHO</span>}{' '}
-                {podeEditar && (
-                  <button
-                    className={`bt mini ${i.esgotado ? 'd' : 'g'}`} type="button"
-                    style={{ marginTop: 5 }}
-                    onClick={() => esgotar(i.id, !i.esgotado)}
-                  >
-                    {i.esgotado ? 'Esgotado' : 'Marcar esgotado'}
-                  </button>
-                )}
+                <div className="estado">
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                    {i.tags?.includes('vegetariano') && <span className="tag veg">VEG</span>}
+                    {i.status === 'rascunho' && <span className="tag rasc">RASCUNHO</span>}
+                  </div>
+                  {podeEditar && (
+                    <button
+                      className={`bt mini ${i.esgotado ? 'd' : 'g'}`} type="button"
+                      onClick={() => esgotar(i.id, !i.esgotado)}
+                    >
+                      {i.esgotado ? 'Esgotado' : 'Marcar esgotado'}
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
