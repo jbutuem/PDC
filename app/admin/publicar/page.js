@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { sessaoAtual, supabaseAdmin, PODE_PUBLICAR } from '@/lib/auth';
+import { sessaoAtual, PODE_PUBLICAR } from '@/lib/auth';
 import Publicador from './Publicador';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ export default async function PaginaPublicar() {
   if (!s?.membro) return <div className="adm-wrap"><div className="aviso-adm mel">Sem acesso.</div></div>;
 
   const podePublicar = PODE_PUBLICAR.includes(s.membro.papel);
-  const sb = supabaseAdmin();
+  const sb = s.sb;
   const tenant = s.membro.tenant_id;
 
   const { data: rascunhos } = await sb

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { sessaoAtual, supabaseAdmin, PODE_EDITAR } from '@/lib/auth';
+import { sessaoAtual, PODE_EDITAR } from '@/lib/auth';
 import Editor from './Editor';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ export default async function PaginaSecao({ params }) {
   const s = await sessaoAtual();
   if (!s?.membro) return <div className="adm-wrap"><div className="aviso-adm mel">Sem acesso.</div></div>;
 
-  const sb = supabaseAdmin();
+  const sb = s.sb;
   const { data: secao } = await sb
     .from('secoes').select('id, slug, nome, subtitulo')
     .eq('tenant_id', s.membro.tenant_id).eq('slug', slug).maybeSingle();

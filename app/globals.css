@@ -155,6 +155,9 @@ body.slots .slot.cheio .spec b{color:var(--mel)}
 .lista{border-top:1px solid var(--fio)}
 .item{display:grid;grid-template-columns:1fr auto;gap:6px 14px;align-items:start;
   padding:13px var(--gut);border-bottom:1px solid var(--fio)}
+.item.comfoto{grid-template-columns:56px 1fr auto;gap:6px 13px}
+.item .mini{width:56px;height:56px;object-fit:cover;border-radius:3px;grid-row:span 2;
+  background:var(--pedra)}
 .item h3{margin:0;font-size:15.5px;font-weight:600;line-height:1.25;letter-spacing:-.005em}
 .item .cod{font-size:10.5px;font-weight:600;color:var(--t40);
   font-variant-numeric:tabular-nums;margin-right:6px}
@@ -295,6 +298,8 @@ body.slots .dev i{background:var(--mel)}
   .cab{padding:0}
   .cab h2{font-size:46px}
   .item{padding:14px 0}
+  .item.comfoto{grid-template-columns:64px 1fr auto}
+  .item .mini{width:64px;height:64px}
   .item:nth-child(odd){padding-right:28px}
   .item:nth-child(even){padding-left:28px}
   .quebra{margin:26px 0;border-radius:4px;overflow:hidden}

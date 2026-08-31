@@ -1,4 +1,4 @@
-import { sessaoAtual, supabaseAdmin, PODE_EDITAR } from '@/lib/auth';
+import { sessaoAtual, PODE_EDITAR } from '@/lib/auth';
 import Gerenciador from './Gerenciador';
 
 export const dynamic = 'force-dynamic';
@@ -7,7 +7,7 @@ export default async function PaginaImagens() {
   const s = await sessaoAtual();
   if (!s?.membro) return <div className="adm-wrap"><div className="aviso-adm mel">Sem acesso.</div></div>;
 
-  const sb = supabaseAdmin();
+  const sb = s.sb;
 
   const { data: imagens } = await sb
     .from('imagens')

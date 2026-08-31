@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sessaoAtual, supabaseAdmin, PODE_EDITAR } from '@/lib/auth';
+import { sessaoAtual, PODE_EDITAR } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -112,7 +112,7 @@ Se nenhum texto precisar de correção, devolva exatamente: []`;
       sugestoes = m ? JSON.parse(m[0]) : [];
     }
 
-    const sb = supabaseAdmin();
+    const sb = s.sb;
     const revisoes = [];
 
     for (const sug of Array.isArray(sugestoes) ? sugestoes : []) {

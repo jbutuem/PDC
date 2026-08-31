@@ -24,7 +24,14 @@ function Slot({ papel, src, alt, foco }) {
 
 function Item({ it }) {
   return (
-    <article className={'item' + (it.esgotado ? ' fora' : '')} data-b={norm(`${it.n} ${it.d} ${it.c}`)}>
+    <article
+      className={'item' + (it.esgotado ? ' fora' : '') + (it.img ? ' comfoto' : '')}
+      data-b={norm(`${it.n} ${it.d} ${it.c}`)}
+    >
+      {it.img && (
+        <img className="mini" src={it.img} alt="" loading="lazy"
+             style={it.foco ? { objectPosition: it.foco } : undefined} />
+      )}
       <div>
         <h3>
           <span className="cod">{it.c}</span>{it.n}

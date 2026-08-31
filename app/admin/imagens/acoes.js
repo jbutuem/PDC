@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { sessaoAtual, supabaseAdmin, PODE_EDITAR, PODE_PUBLICAR } from '@/lib/auth';
+import { sessaoAtual, PODE_EDITAR, PODE_PUBLICAR } from '@/lib/auth';
 
 async function exigir(papeis) {
   const s = await sessaoAtual();
@@ -11,7 +11,7 @@ async function exigir(papeis) {
 
 export async function registrarImagem(dados) {
   const s = await exigir(PODE_EDITAR);
-  const sb = supabaseAdmin();
+  const sb = s.sb;
 
   // Hero e destaque são exclusivos por item: substitui em vez de acumular.
   if (['hero', 'destaque'].includes(dados.papel) && dados.item_id) {
@@ -27,8 +27,8 @@ export async function registrarImagem(dados) {
 }
 
 export async function moverFoco(id, x, y) {
-  await exigir(PODE_EDITAR);
-  const sb = supabaseAdmin();
+  const s = await exigir(PODE_EDITAR);
+  const sb = s.sb;
   await sb.from('imagens').update({ foco_x: x, foco_y: y }).eq('id', id);
   revalidatePath('/admin/imagens');
   revalidatePath('/');
@@ -36,8 +36,8 @@ export async function moverFoco(id, x, y) {
 }
 
 export async function apagarImagem(id, caminho) {
-  await exigir(PODE_PUBLICAR);
-  const sb = supabaseAdmin();
+  const s = await exigir(PODE_PUBLICAR);
+  const sb = s.sb;
   await sb.storage.from('menu').remove([caminho]);
   await sb.from('imagens').delete().eq('id', id);
   revalidatePath('/admin/imagens');

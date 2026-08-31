@@ -7,6 +7,13 @@ import FotoItem from './FotoItem';
 
 const brl = c => (c / 100).toFixed(2).replace('.', ',');
 
+/** Textarea que cresce com o conteúdo: quase toda descrição cabe em uma linha. */
+function autoAltura(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = Math.max(34, el.scrollHeight) + 'px';
+}
+
 export default function Editor({ secao, itens, mediaSecao, podeEditar, urlBase }) {
   const router = useRouter();
   const [pendente, comecar] = useTransition();
@@ -118,6 +125,14 @@ export default function Editor({ secao, itens, mediaSecao, podeEditar, urlBase }
     <>
       {msg && <div className={`aviso-adm ${msg.tipo}`}>{msg.texto}</div>}
 
+      {mediaSecao && (
+        <p className="legenda-tab">
+          Campo <span className="ex mel">amarelo</span> = alterado, ainda não salvo ·{' '}
+          <span className="ex rosa">rosa</span> = preço mais de 40% fora da média desta seção,
+          confira se não é dígito trocado
+        </p>
+      )}
+
       <table className="adm-tab">
         <thead>
           <tr>
@@ -143,10 +158,11 @@ export default function Editor({ secao, itens, mediaSecao, podeEditar, urlBase }
                   style={mudou(`nome_${i.id}`) ? { borderColor: 'var(--mel)', background: '#FFF8EC' } : undefined}
                 />
                 <textarea
-                  className="campo" rows={2} placeholder="Ingredientes, gramatura…"
+                  className="campo desc-auto" rows={1} placeholder="Ingredientes, gramatura…"
                   value={valores[`desc_${i.id}`]} disabled={!podeEditar}
-                  onChange={e => set(`desc_${i.id}`, e.target.value)}
-                  style={{ marginTop: 5, fontSize: 12.5, ...(mudou(`desc_${i.id}`) ? { borderColor: 'var(--mel)', background: '#FFF8EC' } : {}) }}
+                  onChange={e => { set(`desc_${i.id}`, e.target.value); autoAltura(e.target); }}
+                  ref={el => autoAltura(el)}
+                  style={mudou(`desc_${i.id}`) ? { borderColor: 'var(--mel)', background: '#FFF8EC' } : undefined}
                 />
                 {['nome', 'desc'].map(c => {
                   const k = `${c}_${i.id}`;
@@ -204,16 +220,20 @@ export default function Editor({ secao, itens, mediaSecao, podeEditar, urlBase }
       </table>
 
       {podeEditar && (
-        <div className="adm-acoes">
-          <button className="bt p" onClick={salvar} disabled={pendente || !nAlterados}>
-            {pendente ? 'Salvando…' : nAlterados ? `Salvar ${nAlterados} ${nAlterados === 1 ? 'alteração' : 'alterações'}` : 'Nada alterado'}
-          </button>
-          <button className="bt s" onClick={revisar} disabled={revisando}>
-            {revisando ? 'Revisando…' : 'Revisar textos com IA'}
-          </button>
-          <span style={{ fontSize: 12.5, color: 'var(--t40)' }}>
-            Marcar esgotado vai ao ar na hora. O resto vira rascunho até você publicar.
-          </span>
+        <div className={`barra-salvar${nAlterados ? ' ativa' : ''}`}>
+          <div className="in">
+            <span className="estado-salvar">
+              {nAlterados
+                ? <><b>{nAlterados}</b> {nAlterados === 1 ? 'alteração não salva' : 'alterações não salvas'}</>
+                : 'Nada alterado nesta seção'}
+            </span>
+            <button className="bt s" onClick={revisar} disabled={revisando}>
+              {revisando ? 'Revisando…' : 'Revisar textos com IA'}
+            </button>
+            <button className="bt p" onClick={salvar} disabled={pendente || !nAlterados}>
+              {pendente ? 'Salvando…' : 'Salvar'}
+            </button>
+          </div>
         </div>
       )}
     </>

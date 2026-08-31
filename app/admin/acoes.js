@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { sessaoAtual, supabaseAdmin, PODE_EDITAR, PODE_PUBLICAR } from '@/lib/auth';
+import { sessaoAtual, PODE_EDITAR, PODE_PUBLICAR } from '@/lib/auth';
 
 async function exigir(papeis) {
   const s = await sessaoAtual();
@@ -24,7 +24,7 @@ const centavos = txt => {
  */
 export async function salvarSecao(formData) {
   const s = await exigir(PODE_EDITAR);
-  const sb = supabaseAdmin();
+  const sb = s.sb;
 
   const ids = formData.getAll('item_id');
   const alteracoes = [];
@@ -84,8 +84,8 @@ export async function salvarSecao(formData) {
 
 /** Marca ou desmarca esgotado. Vai ao ar na hora — é a exceção deliberada. */
 export async function alternarEsgotado(itemId, esgotado) {
-  await exigir(['operador', ...PODE_EDITAR]);
-  const sb = supabaseAdmin();
+  const s = await exigir(['operador', ...PODE_EDITAR]);
+  const sb = s.sb;
   await sb.from('itens').update({ esgotado, atualizado_em: new Date().toISOString() }).eq('id', itemId);
   await avisarSite();
   revalidatePath('/admin');
@@ -95,7 +95,7 @@ export async function alternarEsgotado(itemId, esgotado) {
 /** Publica tudo que está em rascunho e grava um snapshot para rollback. */
 export async function publicarTudo(nota) {
   const s = await exigir(PODE_PUBLICAR);
-  const sb = supabaseAdmin();
+  const sb = s.sb;
   const tenant = s.membro.tenant_id;
 
   const { data: pendentes } = await sb

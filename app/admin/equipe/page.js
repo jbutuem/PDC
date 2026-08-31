@@ -7,13 +7,19 @@ export default async function PaginaEquipe() {
   const s = await sessaoAtual();
   if (!s?.membro) return <div className="adm-wrap"><div className="aviso-adm mel">Sem acesso.</div></div>;
 
-  const sb = supabaseAdmin();
-  const { data: membros } = await sb
+  const { data: membros } = await s.sb
     .from('membros').select('id, user_id, nome, papel')
     .eq('tenant_id', s.membro.tenant_id).order('criado_em');
 
-  const { data: { users } = { users: [] } } = await sb.auth.admin.listUsers();
-  const email = Object.fromEntries((users ?? []).map(u => [u.id, u.email]));
+  // auth.users não é acessível por RLS: é o único lugar onde a service_role
+  // é realmente necessária, e só para mostrar o e-mail de cada membro.
+  let email = {};
+  try {
+    const { data: { users } = { users: [] } } = await supabaseAdmin().auth.admin.listUsers();
+    email = Object.fromEntries((users ?? []).map(u => [u.id, u.email]));
+  } catch {
+    email = {};
+  }
 
   const lista = (membros ?? []).map(m => ({ ...m, email: email[m.user_id] ?? '—' }));
   const meu = lista.find(m => m.user_id === s.user.id);
