@@ -28,7 +28,7 @@ function traduzir(msg = '') {
   return msg;
 }
 
-export default function FotoItem({ item, urlBase, podeEditar }) {
+export default function FotoItem({ item, urlBase, podeEditar, aoFalhar }) {
   const router = useRouter();
   const arquivo = useRef(null);
   const [ocupado, setOcupado] = useState(false);
@@ -70,6 +70,7 @@ export default function FotoItem({ item, urlBase, podeEditar }) {
       router.refresh();
     } catch (err) {
       setErro(err.message);
+      aoFalhar?.(err.message);
     }
     setOcupado(false);
     setPasso('');

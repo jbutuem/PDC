@@ -18,6 +18,7 @@ export default function Editor({ secao, itens, mediaSecao, podeEditar, urlBase }
   const router = useRouter();
   const [pendente, comecar] = useTransition();
   const [msg, setMsg] = useState(null);
+  const [erroFoto, setErroFoto] = useState(null);
   const [revisoes, setRevisoes] = useState({});
   const [revisando, setRevisando] = useState(false);
   const [valores, setValores] = useState(() => {
@@ -125,6 +126,21 @@ export default function Editor({ secao, itens, mediaSecao, podeEditar, urlBase }
     <>
       {msg && <div className={`aviso-adm ${msg.tipo}`}>{msg.texto}</div>}
 
+      {erroFoto && (
+        <div className="aviso-adm risco" style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+          <span>
+            <b>A foto de "{erroFoto.item}" não subiu.</b><br />
+            {erroFoto.texto}
+          </span>
+          <button className="bt g mini" style={{ marginLeft: 'auto', flex: '0 0 auto' }}
+                  onClick={() => { navigator.clipboard?.writeText(erroFoto.texto); }}>
+            copiar mensagem
+          </button>
+          <button className="bt g mini" style={{ flex: '0 0 auto' }}
+                  onClick={() => setErroFoto(null)}>fechar</button>
+        </div>
+      )}
+
       {mediaSecao && (
         <p className="legenda-tab">
           Campo <span className="ex mel">amarelo</span> = alterado, ainda não salvo ·{' '}
@@ -149,7 +165,8 @@ export default function Editor({ secao, itens, mediaSecao, podeEditar, urlBase }
           {itens.map(i => (
             <tr key={i.id}>
               <td>
-                <FotoItem item={i} urlBase={urlBase} podeEditar={podeEditar} />
+                <FotoItem item={i} urlBase={urlBase} podeEditar={podeEditar}
+                          aoFalhar={m => setErroFoto({ item: i.nome, texto: m })} />
               </td>
               <td>
                 <input
