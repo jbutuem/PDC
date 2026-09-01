@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { CASA } from '@/lib/casa';
 
 const SPEC = {
-  hero: { rot: 'HERO', prop: '2,6:1 no desktop · 4:5 no celular', px: 'mín. 2400 × 1000 px' },
+  hero: { rot: 'HERO', prop: '2,6:1 no desktop · 5:4 no celular', px: 'mín. 2400 × 1600 px' },
   destaque: { rot: 'DESTAQUE', prop: '2,4:1 no desktop · 3:2 no celular', px: 'mín. 1800 × 1200 px' },
   produto: { rot: 'PRODUTO', prop: 'quadrada 1:1', px: 'mín. 800 × 800 px' },
   promo: { rot: 'PROMOÇÃO', prop: '4:3 · texto entra por baixo', px: 'mín. 1200 × 900 px' }
@@ -12,11 +13,19 @@ const SPEC = {
 const brl = c => 'R$ ' + (c / 100).toFixed(2).replace('.', ',');
 const norm = s => (s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-function Slot({ papel, src, alt, foco }) {
+function Slot({ papel, src, alt, foco, prioritaria }) {
   const s = SPEC[papel];
   return (
     <div className={'slot' + (src ? ' cheio' : '')} style={foco ? { '--foco': foco } : undefined}>
-      {src && <img src={src} alt={alt ?? ''} loading="lazy" />}
+      {src && (
+        <img
+          src={src}
+          alt={alt ?? ''}
+          loading={prioritaria ? 'eager' : 'lazy'}
+          fetchPriority={prioritaria ? 'high' : 'auto'}
+          decoding={prioritaria ? 'sync' : 'async'}
+        />
+      )}
       <div className="spec"><b>{s.rot}</b>{s.prop}<i>{s.px}</i></div>
     </div>
   );
@@ -62,22 +71,29 @@ function Pizza({ it }) {
 function CardPromo({ p }) {
   return (
     <article className="pc" data-b={norm(`${p.n} ${p.d}`)}>
-      <Slot papel="promo" src={p.img} alt={p.n} foco="50% 45%" />
+      <Slot papel="promo" src={p.img} alt="" foco={p.foco ?? '50% 45%'} />
       <div className="veu" />
       <div className={'selo ' + (p.tipo ?? '')}>{p.selo}</div>
       <div className="txt">
         <h3>{p.n}</h3><p>{p.d}</p>
-        <div className="val">{p.de ? <s>{p.de}</s> : null}<b>{p.por}</b><em>{p.obs}</em></div>
+        {(p.por || p.obs) && (
+          <div className="val">
+            {p.de ? <s>{p.de}</s> : null}
+            {p.por ? <b>{p.por}</b> : null}
+            {p.obs ? <em>{p.obs}</em> : null}
+          </div>
+        )}
       </div>
     </article>
   );
 }
 
-export default function Menu({ secoes, promos = [], comunicado, banners = {} }) {
+export default function Menu({ secoes, promos = [], comunicado, hero = null }) {
   const [q, setQ] = useState('');
   const [ativa, setAtiva] = useState(secoes[0]?.slug);
   const [avisoAberto, setAvisoAberto] = useState(true);
   const [slots, setSlots] = useState(false);
+  const [modoDev, setModoDev] = useState(false);
   const [grudou, setGrudou] = useState(false);
   const trilhoRef = useRef(null);
 
@@ -94,6 +110,12 @@ export default function Menu({ secoes, promos = [], comunicado, banners = {} }) 
   useEffect(() => {
     document.body.classList.toggle('slots', slots);
   }, [slots]);
+
+  // A régua de slots é ferramenta de produção, não de cliente. Fica atrás
+  // de ?slots=1 para não aparecer um botão flutuante no site publicado.
+  useEffect(() => {
+    setModoDev(new URLSearchParams(window.location.search).has('slots'));
+  }, []);
 
   useEffect(() => {
     const aoRolar = () => setGrudou(window.scrollY > 40);
@@ -127,26 +149,26 @@ export default function Menu({ secoes, promos = [], comunicado, banners = {} }) 
         <div className="in">
           <div className="marca">Pão da Primavera<span>BOULANGERIE</span></div>
           <nav className="siteNav">
-            <a href="#" className="on">Cardápio</a>
-            <a href="#">A casa</a>
-            <a href="#">Encomendas</a>
-            <a href="#">Onde estamos</a>
+            <a href="#cardapio" className="on">Cardápio</a>
+            <a href={CASA.site} target="_blank" rel="noreferrer">A casa</a>
+            <a href={CASA.site} target="_blank" rel="noreferrer">Encomendas</a>
+            <a href={CASA.mapa} target="_blank" rel="noreferrer">Onde estamos</a>
           </nav>
-          <div className="horario"><b>Aberto agora</b>até 21h45</div>
+          <div className="horario">
+            <b>{CASA.horario.rotulo}</b>{CASA.horario.ate}
+          </div>
         </div>
       </header>
 
       <section className="hero">
-        <Slot papel="hero" src={banners.hero?.img} alt={banners.hero?.n} foco={banners.hero?.foco ?? '50% 42%'} />
+        <Slot papel="hero" src={hero?.img} alt={hero?.alt ?? ''} foco={hero?.foco ?? '50% 50%'}
+              prioritaria />
         <div className="veu" />
         <div className="txt">
-          <div className="kick">{banners.hero?.kick ?? 'DA CHAPA, AGORA'}</div>
-          <h1>{banners.hero?.n ?? 'Roast beef na ciabatta'}</h1>
-          <p>{banners.hero?.d ?? 'Roast beef caseiro 100 g, patê de gorgonzola e rúcula'}</p>
-          <div className="val">
-            <strong>{banners.hero?.p ?? 'R$ 45,90'}</strong>
-            <em>cód. {banners.hero?.c ?? '6596'}</em>
-          </div>
+          <div className="kick">{hero?.kick ?? 'DESDE 1999, NO CAMBUÍ'}</div>
+          <h1>{hero?.n ?? 'Pão da Primavera'}</h1>
+          {hero?.d ? <p>{hero.d}</p> : null}
+          <a className="hero-bt" href="#cardapio">Ver o cardápio</a>
         </div>
       </section>
 
@@ -161,6 +183,8 @@ export default function Menu({ secoes, promos = [], comunicado, banners = {} }) 
           </div>
         </section>
       )}
+
+      <span id="cardapio" className="ancora" aria-hidden="true" />
 
       <nav className={'nav' + (grudou ? ' grudou' : '')}>
         <div className="in">
@@ -232,14 +256,16 @@ export default function Menu({ secoes, promos = [], comunicado, banners = {} }) 
         <div className="in">
           <div className="marca">Pão da Primavera<span>DESDE 1999</span></div>
           <div className="links">
-            <a href="https://www.paodaprimavera.com.br">paodaprimavera.com.br</a>
-            <a href="https://instagram.com/paodaprimaveracampinas">@paodaprimaveracampinas</a>
-            <a href="https://facebook.com/paodaprimavera">facebook.com/paodaprimavera</a>
+            <a href={CASA.site} target="_blank" rel="noreferrer">paodaprimavera.com.br</a>
+            <a href={CASA.instagram} target="_blank" rel="noreferrer">@paodaprimaveracampinas</a>
+            <a href={CASA.facebook} target="_blank" rel="noreferrer">facebook.com/paodaprimavera</a>
           </div>
           <div className="acoes">
-            <button>Como chegar</button>
-            <button>Fazer uma encomenda</button>
-            <button>Falar no WhatsApp</button>
+            <a href={CASA.mapa} target="_blank" rel="noreferrer">Como chegar</a>
+            <a href={CASA.site} target="_blank" rel="noreferrer">Fazer uma encomenda</a>
+            {CASA.whatsapp && (
+              <a href={CASA.whatsapp} target="_blank" rel="noreferrer">Falar no WhatsApp</a>
+            )}
           </div>
           <p className="legal">
             O acesso às dependências onde são preparados e armazenados nossos alimentos é garantido
@@ -252,9 +278,11 @@ export default function Menu({ secoes, promos = [], comunicado, banners = {} }) 
         </div>
       </footer>
 
-      <button className="dev" onClick={() => setSlots(v => !v)}>
-        <i /> Ver slots de imagem
-      </button>
+      {modoDev && (
+        <button className="dev" onClick={() => setSlots(v => !v)}>
+          <i /> Ver slots de imagem
+        </button>
+      )}
     </>
   );
 }

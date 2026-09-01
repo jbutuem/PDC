@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
-import { registrarImagem, apagarImagem, moverFoco } from '@/app/admin/imagens/acoes';
+import { registrarImagem, apagarImagem, moverFoco, descartarArquivo } from '@/app/admin/imagens/acoes';
 import { prepararImagem, formatarTamanho } from '@/lib/imagem';
 
 /**
@@ -58,13 +58,18 @@ export default function FotoItem({ item, urlBase, podeEditar, aoFalhar }) {
         .upload(caminho, pronta.blob, { cacheControl: '31536000', contentType: 'image/jpeg' });
       if (error) throw new Error(traduzir(error.message));
 
-      if (foto) await apagarImagem(foto.id, foto.storage_path);
-
+      // A partir daqui o arquivo já existe no Storage. Se o registro falhar,
+      // ele precisa ser removido, senão vira lixo que ninguém referencia.
       setPasso('salvando');
-      await registrarImagem({
-        storage_path: caminho, papel: 'produto', item_id: item.id,
-        largura: pronta.largura, altura: pronta.altura, alt: item.nome
-      });
+      try {
+        await registrarImagem({
+          storage_path: caminho, papel: 'produto', item_id: item.id,
+          largura: pronta.largura, altura: pronta.altura, alt: item.nome
+        });
+      } catch (falha) {
+        await descartarArquivo(caminho).catch(() => {});
+        throw falha;
+      }
 
       if (pronta.aviso) setErro(pronta.aviso);
       router.refresh();

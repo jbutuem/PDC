@@ -239,3 +239,42 @@ textarea.campo{min-height:52px;resize:vertical;line-height:1.4}
 .foto-passo{font-size:10.5px;color:var(--forno);font-weight:600}
 .foto-erro{font-size:10.5px;color:var(--geleia);line-height:1.35;max-width:210px;
   display:block;margin-top:2px}
+
+/* ===== VITRINE ===== */
+.vit-bloco{background:#fff;border:1px solid var(--fio,rgba(51,41,31,.14));
+  border-radius:6px;padding:20px;margin:18px 0}
+.vit-bloco h2{margin:0 0 4px;font-size:16px}
+.vit-bloco > p.s{margin:0 0 14px;font-size:13px;color:rgba(51,41,31,.6);line-height:1.45}
+.vit-bloco textarea,.vit-bloco input,.vit-bloco select{width:100%;box-sizing:border-box;
+  padding:9px 10px;border:1px solid rgba(51,41,31,.2);border-radius:4px;
+  font:inherit;font-size:13.5px;background:#fff}
+.vit-bloco label{display:block;margin-bottom:11px;font-size:11px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:rgba(51,41,31,.6)}
+.vit-bloco label i{font-style:normal;font-weight:500;text-transform:none;
+  letter-spacing:0;opacity:.75;margin-left:6px}
+.vit-bloco label input,.vit-bloco label textarea,.vit-bloco label select{margin-top:5px}
+
+.vit-hero{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+@media(min-width:820px){.vit-hero{grid-template-columns:minmax(0,340px) minmax(0,1fr)}}
+.vit-previa{position:relative;border-radius:5px;overflow:hidden;background:#33291F;
+  aspect-ratio:5/4}
+.vit-previa img{width:100%;height:100%;object-fit:cover;display:block}
+.vit-previa-txt{position:absolute;inset:auto 0 0 0;padding:14px;color:#fff;
+  background:linear-gradient(to top,rgba(28,21,15,.9),rgba(28,21,15,0))}
+.vit-previa-txt b{display:block;font-size:9.5px;letter-spacing:.16em;color:#FCB758}
+.vit-previa-txt strong{display:block;font-family:var(--serif,Georgia),serif;
+  font-size:22px;line-height:1.1;margin:5px 0 4px}
+.vit-previa-txt span{font-size:12px;opacity:.85;line-height:1.35}
+
+.vit-check{display:flex !important;align-items:center;gap:8px;text-transform:none;
+  letter-spacing:0;font-size:13px;font-weight:500;margin:10px 0 14px}
+.vit-check input{width:auto;margin:0}
+
+.vit-promo{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;
+  padding:14px 0;border-top:1px solid rgba(51,41,31,.1)}
+.vit-promo.off{opacity:.5}
+.vit-promo-foto{aspect-ratio:4/3;border-radius:4px;overflow:hidden;background:#D6D3CE;
+  display:flex;align-items:center;justify-content:center;font-size:10px;
+  color:rgba(51,41,31,.5)}
+.vit-promo-foto img{width:100%;height:100%;object-fit:cover}
+.vit-linha{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}

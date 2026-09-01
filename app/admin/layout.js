@@ -16,6 +16,7 @@ export default async function LayoutAdmin({ children }) {
           <Link href="/admin" className="logo">Pão da Primavera</Link>
           <nav>
             <Link href="/admin">Cardápio</Link>
+            <Link href="/admin/vitrine">Vitrine</Link>
             <Link href="/admin/imagens">Imagens</Link>
             <Link href="/admin/publicar">Publicar</Link>
             <Link href="/admin/equipe">Equipe</Link>

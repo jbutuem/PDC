@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
-import { registrarImagem, moverFoco, apagarImagem } from './acoes';
+import { registrarImagem, moverFoco, apagarImagem, descartarArquivo } from './acoes';
 import { prepararImagem } from '@/lib/imagem';
 
 const SPEC = {
@@ -16,8 +16,8 @@ const SPEC = {
     dica: 'Bloco que rompe a margem. O desktop recorta uma faixa 2,4:1 do meio — deixe ar em cima e embaixo.'
   },
   hero: {
-    rot: 'Hero', prop: 'envie em 4:5 (retrato)', min: '2400 × 3000 px',
-    dica: 'O celular usa a imagem inteira em retrato; o desktop recorta uma faixa 2,6:1 do meio. Por isso ela precisa ser alta, não larga.'
+    rot: 'Hero', prop: 'envie em paisagem 3:2', min: '2400 × 1600 px',
+    dica: 'O celular recorta 5:4 e o desktop uma faixa 2,6:1 — ambos do meio. Deixe o produto no centro e ar nas bordas. O texto entra no terço de baixo: mantenha essa área limpa.'
   },
   promo: {
     rot: 'Promoção', prop: '4:3 (paisagem)', min: '1200 × 900 px',
@@ -55,11 +55,16 @@ export default function Gerenciador({ imagens, itens, urlBase, podeEditar }) {
         .upload(caminho, pronta.blob, { cacheControl: '31536000', contentType: 'image/jpeg' });
       if (error) throw new Error(error.message);
 
-      await registrarImagem({
-        storage_path: caminho, papel, item_id: itemId || null,
-        largura: pronta.largura, altura: pronta.altura,
-        alt: pronta.nome.replace(/\.[^.]+$/, '')
-      });
+      try {
+        await registrarImagem({
+          storage_path: caminho, papel, item_id: itemId || null,
+          largura: pronta.largura, altura: pronta.altura,
+          alt: pronta.nome.replace(/\.[^.]+$/, '')
+        });
+      } catch (falha) {
+        await descartarArquivo(caminho).catch(() => {});
+        throw falha;
+      }
 
       setMsg(pronta.aviso
         ? { tipo: 'mel', texto: pronta.aviso }

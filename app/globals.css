@@ -111,7 +111,10 @@ body.slots .slot.cheio .spec b{color:var(--mel)}
 
 /* ===== HERO ===== */
 .hero{position:relative;background:var(--tinta)}
-.hero .slot{aspect-ratio:4/5}
+/* Era 4/5. Num cardápio, uma hero em retrato empurra a comida toda para
+   baixo da dobra: a pessoa abriu o site para ver a lista, não um pôster.
+   5/4 mantém a foto generosa e ainda deixa a busca aparecer no celular. */
+.hero .slot{aspect-ratio:5/4}
 .hero .veu{position:absolute;inset:auto 0 0 0;height:64%;pointer-events:none;
   background:linear-gradient(to top,rgba(23,17,12,.94) 12%,rgba(23,17,12,.5) 48%,transparent)}
 .hero .txt{position:absolute;left:var(--gut);right:var(--gut);bottom:22px;color:#fff}
@@ -326,3 +329,53 @@ body.slots .dev i{background:var(--mel)}
 }
 
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+
+/* ===== AJUSTES DESTA RODADA ===== */
+
+/* Véu mais firme embaixo: com foto clara (pão dourado, louça branca) o texto
+   branco sumia. Duas paradas extras dão contraste sem escurecer a comida. */
+.hero .veu{background:linear-gradient(to top,
+  rgba(28,21,15,.88) 0%, rgba(28,21,15,.72) 26%,
+  rgba(28,21,15,.34) 62%, rgba(28,21,15,0) 100%)}
+.hero h1{text-wrap:balance;text-shadow:0 1px 18px rgba(20,14,9,.45)}
+.hero p{opacity:.9}
+
+.hero-bt{display:inline-block;margin-top:16px;padding:11px 20px;border-radius:3px;
+  background:var(--mel);color:#42320F;font-size:13px;font-weight:700;
+  letter-spacing:.03em;text-decoration:none;transition:transform .12s,filter .12s}
+.hero-bt:hover{filter:brightness(1.06)}
+.hero-bt:active{transform:translateY(1px)}
+.hero-bt:focus-visible{outline:3px solid #fff;outline-offset:3px}
+
+/* Âncora do botão da hero. Recuada pela altura da barra grudada, senão o
+   primeiro título fica escondido atrás dela. */
+.ancora{display:block;height:0;scroll-margin-top:120px}
+
+.tarja-seed{background:#93431F;color:#F8F2EA;padding:7px 20px;font-size:12px;
+  font-weight:600;text-align:center;letter-spacing:.04em}
+
+/* Rodapé: os "botões" viraram links de verdade e precisavam recuperar a
+   aparência de botão. */
+.pe .acoes a{display:inline-block;text-decoration:none}
+
+/* Foco visível em toda navegação por teclado. Não existia em lugar nenhum. */
+a:focus-visible,button:focus-visible,input:focus-visible{
+  outline:2px solid var(--mel);outline-offset:2px;border-radius:2px}
+
+/* Reserva o espaço da imagem antes de ela chegar: sem isto o texto pula
+   quando a foto carrega, e o Google penaliza por isso. */
+.slot{contain:layout paint}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important;
+    scroll-behavior:auto !important}
+}
+
+@media (min-width:900px){
+  .hero .slot{aspect-ratio:2.6/1}
+  .hero .txt{left:50%;transform:translateX(-50%);width:min(1240px,100%);
+    padding:0 var(--gut);bottom:38px}
+  .hero h1{max-width:16ch}
+  .hero p{max-width:44ch}
+}

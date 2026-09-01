@@ -1,45 +1,48 @@
 import Menu from '@/components/Menu';
-import { carregarMenu, carregarComunicado, carregarDestaques } from '@/lib/menu';
+import { carregarMenu, carregarComunicado, carregarVitrine } from '@/lib/menu';
 
 // ISR: a página é estática no CDN e só é regerada quando a publicação
 // chama /api/revalidate. O revalidate de 1h é apenas uma rede de segurança.
 export const revalidate = 3600;
 
-const PROMOS = [
-  { selo: 'NOVO', tipo: 'novo', n: 'Cappuccino de pistache',
-    d: 'Creme de pistache, raspas de chocolate e crocante por cima',
-    por: 'R$ 29,90', obs: '250 ml' },
-  { selo: 'ATÉ DOMINGO', n: 'Combo hambúrguer e fritas',
-    d: 'Hambúrguer com queijo prato, alface e tomate mais porção individual',
-    de: 'R$ 57,80', por: 'R$ 46,90', obs: 'após as 17h' },
-  { selo: 'SEGUNDA A QUINTA', tipo: 'tempo', n: 'Açaí com 3 acompanhamentos',
-    d: 'Tigela ou copo de 400 ml, você escolhe os três',
-    de: 'R$ 31,90', por: 'R$ 26,90', obs: 'até as 18h' },
-  { selo: 'TODO DIA ATÉ 10H', tipo: 'tempo', n: 'Pão na chapa e cappuccino',
-    d: 'O par que abre o dia desde 1999',
-    de: 'R$ 28,40', por: 'R$ 22,90', obs: 'no salão' }
-];
+export async function generateMetadata() {
+  const { hero } = await carregarVitrine();
+  const descricao =
+    'Cardápio completo do salão da Pão da Primavera Boulangerie, no Cambuí, ' +
+    'em Campinas. Padaria, cafeteria, almoço, pizzas e sanduíches.';
+
+  return {
+    title: 'Cardápio — Pão da Primavera Boulangerie',
+    description: descricao,
+    openGraph: {
+      title: 'Cardápio — Pão da Primavera',
+      description: descricao,
+      type: 'website',
+      locale: 'pt_BR',
+      images: hero?.img
+        ? [{ url: hero.img, width: hero.largura ?? undefined,
+             height: hero.altura ?? undefined, alt: hero.alt }]
+        : []
+    }
+  };
+}
 
 export default async function Pagina() {
-  const { secoes, origem } = await carregarMenu();
-  const comunicado = await carregarComunicado();
-  const { hero } = await carregarDestaques();
-
-  const banners = hero?.img
-    ? { hero: { ...hero, kick: 'DESTAQUE DA CASA', p: null } }
-    : {};
+  // Uma volta só ao banco por render. Antes eram três chamadas em série.
+  const [{ secoes, origem }, comunicado, { hero, promos }] = await Promise.all([
+    carregarMenu(),
+    carregarComunicado(),
+    carregarVitrine()
+  ]);
 
   return (
     <>
       {origem === 'seed' && (
-        <div style={{
-          background: '#93431F', color: '#F8F2EA', padding: '7px 20px',
-          fontSize: 12, fontWeight: 600, textAlign: 'center', letterSpacing: '.04em'
-        }}>
+        <div className="tarja-seed">
           Dados do seed local — o Supabase ainda não está conectado a este deploy.
         </div>
       )}
-      <Menu secoes={secoes} promos={PROMOS} comunicado={comunicado} banners={banners} />
+      <Menu secoes={secoes} promos={promos} comunicado={comunicado} hero={hero} />
     </>
   );
 }
