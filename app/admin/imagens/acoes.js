@@ -12,7 +12,7 @@ async function exigir(papeis) {
 function atualizarPaginas() {
   revalidatePath('/admin/imagens');
   revalidatePath('/admin/vitrine');
-  revalidatePath('/');
+  revalidatePath('/', 'layout');
 }
 
 /**
@@ -44,7 +44,11 @@ export async function registrarImagem(dados) {
   if (exclusivo || porItem) {
     let q = sb.from('imagens').select('id, storage_path').eq('papel', dados.papel);
     if (dados.item_id) q = q.eq('item_id', dados.item_id);
-    else if (exclusivo) q = q.is('item_id', null);
+    else if (exclusivo) {
+      // Uma hero por loja (ou uma para as duas): trocar a do Cambuí não apaga a da Primavera.
+      q = q.is('item_id', null);
+      q = dados.loja_id ? q.eq('loja_id', dados.loja_id) : q.is('loja_id', null);
+    }
     anteriores = (await q).data ?? [];
   }
 
@@ -108,7 +112,8 @@ export async function salvarTextoHero(id, campos) {
     chamada: limpar(campos.chamada),
     titulo: limpar(campos.titulo),
     linha_apoio: limpar(campos.linha_apoio),
-    alt: limpar(campos.alt)
+    alt: limpar(campos.alt),
+    loja_id: campos.loja_id || null
   }).eq('id', id);
   if (error) throw new Error(error.message);
   atualizarPaginas();

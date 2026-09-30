@@ -1,12 +1,11 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Cardápio — Pão da Primavera',
-  description: 'Cardápio do salão da Pão da Primavera Boulangerie, no Cambuí, Campinas.',
-  openGraph: { title: 'Cardápio — Pão da Primavera', type: 'website' }
+  title: 'Cardápio — Pão do Cambuí e Pão da Primavera',
+  description: 'Cardápio do salão das padarias Pão do Cambuí e Pão da Primavera, em Campinas.'
 };
 
-export const viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover' };
+export const viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#33291F' };
 
 export default function RootLayout({ children }) {
   return (

@@ -17,6 +17,6 @@ export async function POST(request) {
     return NextResponse.json({ erro: 'Segredo inválido.' }, { status: 401 });
   }
 
-  revalidatePath('/');
+  revalidatePath('/', 'layout');
   return NextResponse.json({ ok: true, revalidado: '/', em: new Date().toISOString() });
 }

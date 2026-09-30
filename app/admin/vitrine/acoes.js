@@ -11,7 +11,7 @@ async function exigir() {
 
 function atualizar() {
   revalidatePath('/admin/vitrine');
-  revalidatePath('/');
+  revalidatePath('/', 'layout');
 }
 
 const texto = v => (typeof v === 'string' && v.trim() ? v.trim() : null);
@@ -25,7 +25,7 @@ function centavos(v) {
   return Math.round(n * 100);
 }
 
-export async function salvarComunicado({ texto: corpo, ativo }) {
+export async function salvarComunicado({ texto: corpo, ativo, loja_id }) {
   const s = await exigir();
   const corpoLimpo = texto(corpo);
 
@@ -38,7 +38,7 @@ export async function salvarComunicado({ texto: corpo, ativo }) {
     return { ok: true, removido: true };
   }
 
-  const linha = { texto: corpoLimpo, ativo: Boolean(ativo) };
+  const linha = { texto: corpoLimpo, ativo: Boolean(ativo), loja_id: loja_id || null };
   const { error } = atual
     ? await s.sb.from('comunicados').update(linha).eq('id', atual.id)
     : await s.sb.from('comunicados').insert({ ...linha, tenant_id: s.membro.tenant_id });
@@ -66,7 +66,8 @@ export async function salvarPromocao(id, campos) {
     preco_por_centavos: por,
     observacao: texto(campos.observacao),
     ativo: Boolean(campos.ativo),
-    ordem: Number(campos.ordem) || 0
+    ordem: Number(campos.ordem) || 0,
+    loja_id: campos.loja_id || null
   };
   if (!linha.titulo) throw new Error('A promoção precisa de um título.');
 

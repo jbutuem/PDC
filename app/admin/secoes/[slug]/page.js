@@ -16,21 +16,34 @@ export default async function PaginaSecao({ params }) {
     .eq('tenant_id', s.membro.tenant_id).eq('slug', slug).maybeSingle();
   if (!secao) notFound();
 
-  const { data: brutos } = await sb
-    .from('itens')
-    .select('id, codigo_pdv, nome, descricao, tags, status, esgotado, ordem, variantes ( id, rotulo, ordem, precos ( valor_centavos, vigencia_fim, vigencia_inicio ) ), imagens ( id, storage_path, papel, foco_x, foco_y )')
-    .eq('secao_id', secao.id)
-    .order('ordem');
+  const [{ data: lojas }, { data: grupos }, { data: brutos }] = await Promise.all([
+    sb.from('lojas').select('id, slug, nome').eq('tenant_id', s.membro.tenant_id).eq('ativo', true).order('ordem'),
+    sb.from('grupos').select('id, nome, nota, ordem').eq('secao_id', secao.id).order('ordem'),
+    sb.from('itens')
+      .select(`id, grupo_id, codigo_pdv, nome, descricao, tags, status, esgotado, ordem,
+               variantes ( id, rotulo, ordem, precos ( valor_centavos, vigencia_fim, vigencia_inicio, loja_id ) ),
+               imagens ( id, storage_path, papel, foco_x, foco_y ),
+               itens_lojas ( loja_id, disponivel )`)
+      .eq('secao_id', secao.id)
+      .order('ordem')
+  ]);
+
+  const vigente = (precos, lojaId) => (precos ?? [])
+    .filter(p => !p.vigencia_fim && (p.loja_id ?? null) === lojaId)
+    .sort((a, b) => new Date(b.vigencia_inicio) - new Date(a.vigencia_inicio))[0]?.valor_centavos ?? null;
 
   const itens = (brutos ?? []).map(i => ({
-    ...i,
+    id: i.id, grupo_id: i.grupo_id, codigo_pdv: i.codigo_pdv, nome: i.nome, descricao: i.descricao,
+    tags: i.tags, status: i.status, esgotado: i.esgotado,
     imagem: (i.imagens ?? []).find(x => x.papel === 'produto') ?? null,
-    variantes: (i.variantes ?? []).sort((a, b) => a.ordem - b.ordem).map(v => {
-      const vig = (v.precos ?? [])
-        .filter(p => !p.vigencia_fim)
-        .sort((a, b) => new Date(b.vigencia_inicio) - new Date(a.vigencia_inicio))[0];
-      return { id: v.id, rotulo: v.rotulo, preco: vig?.valor_centavos ?? null };
-    })
+    // Sem linha em itens_lojas = a loja vende. Só as exceções são gravadas.
+    naoVende: (i.itens_lojas ?? []).filter(x => !x.disponivel).map(x => x.loja_id),
+    variantes: (i.variantes ?? []).sort((a, b) => a.ordem - b.ordem).map(v => ({
+      id: v.id,
+      rotulo: v.rotulo,
+      preco: vigente(v.precos, null),
+      porLoja: Object.fromEntries((lojas ?? []).map(l => [l.id, vigente(v.precos, l.id)]).filter(([, x]) => x != null))
+    }))
   }));
 
   const todos = itens.flatMap(i => i.variantes.map(v => v.preco)).filter(Boolean);
@@ -50,22 +63,12 @@ export default async function PaginaSecao({ params }) {
       </div>
       <p className="adm-sub">
         {secao.subtitulo ? secao.subtitulo + ' · ' : ''}{itens.length} itens
-        {media && ` · média da seção R$ ${(media / 100).toFixed(2).replace('.', ',')}`}
+        {semFoto > 0 ? ` · ${semFoto} sem foto` : ' · todos com foto'}
       </p>
 
-      <div className="atalhos">
-        <span>
-          <b>{semFoto === 0 ? 'Todos os itens têm foto.' : `${semFoto} de ${itens.length} itens sem foto.`}</b>{' '}
-          Clique em <b>+ foto</b> na linha do item para subir. Depois clique sobre a
-          miniatura para marcar o ponto de foco — é ele que decide o corte em cada tela.
-        </span>
-        <Link href="/admin/imagens" className="bt g mini" style={{ marginLeft: 'auto' }}>
-          Hero e banners →
-        </Link>
-      </div>
-
       <Editor
-        secao={secao} itens={itens} mediaSecao={media} urlBase={urlBase}
+        secao={secao} itens={itens} grupos={grupos ?? []} lojas={lojas ?? []}
+        mediaSecao={media} urlBase={urlBase}
         podeEditar={PODE_EDITAR.includes(s.membro.papel)}
       />
     </div>

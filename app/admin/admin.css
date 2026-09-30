@@ -278,3 +278,72 @@ textarea.campo{min-height:52px;resize:vertical;line-height:1.4}
   color:rgba(51,41,31,.5)}
 .vit-promo-foto img{width:100%;height:100%;object-fit:cover}
 .vit-linha{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+
+/* =====================================================================
+   DUAS LOJAS — o padrão (vende nas duas, mesmo preço) fica em silêncio;
+   só a exceção ganha cor. 99% dos itens não pedem nenhuma atenção.
+   ===================================================================== */
+.lojas-explica{background:var(--branco);border:1px solid var(--fio);border-left:3px solid var(--forno);
+  border-radius:0 4px 4px 0;padding:11px 15px;font-size:13px;color:var(--t70);margin:0 0 14px;line-height:1.5}
+.lojas-explica b{color:var(--tinta)}
+.lojas-explica em{font-style:normal;font-weight:600;color:var(--forno)}
+
+.filtros{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 12px}
+.adm .filtros button{border:1px solid var(--fio);background:var(--branco);border-radius:999px;padding:6px 12px;
+  font-size:12.5px;font-weight:600;color:var(--t70);cursor:pointer}
+.adm .filtros button span{font-weight:700;color:var(--t40);margin-left:3px;font-variant-numeric:tabular-nums}
+.adm .filtros button.on{background:var(--tinta);border-color:var(--tinta);color:var(--branco)}
+.adm .filtros button.on span{color:rgba(251,247,242,.6)}
+.adm .filtros button:disabled{opacity:.45;cursor:default}
+.filtros .legenda-tab{margin:0 0 0 auto}
+
+.adm-tab .grupo-linha td{background:var(--papel);padding:14px 12px 6px;font-size:10.5px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--forno);border-bottom:1px solid var(--fio)}
+.adm-tab .grupo-linha td span{letter-spacing:.02em;text-transform:none;font-weight:500;color:var(--t40)}
+
+/* Linha com exceção: fio mel à esquerda + resumo em texto */
+.adm-tab tr.excecao td:first-child{box-shadow:inset 3px 0 0 var(--mel)}
+.dif-resumo{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px}
+.dif-resumo span{font-size:11.5px;font-weight:600;color:#7A5410;background:#FFF3DA;border-radius:3px;padding:2px 7px}
+
+.celula-preco{text-align:right}
+.variante + .variante{margin-top:10px;padding-top:8px;border-top:1px dashed var(--fio)}
+.rot-var{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--t40);margin-bottom:3px}
+.era{display:block;font-size:11px;color:var(--t40);margin-top:3px;text-decoration:line-through}
+.adm .por-loja{display:block;margin:4px 0 0 auto;background:none;border:0;padding:2px 0;cursor:pointer;
+  font-size:11px;font-weight:600;color:var(--t40);text-decoration:none}
+.adm .por-loja::after{content:' ▾';font-size:9px}
+.adm .por-loja.on::after{content:' ▴'}
+.adm .por-loja:hover,.adm .por-loja:focus-visible{color:var(--forno);text-decoration:underline;text-underline-offset:2px}
+.precos-loja{margin-top:6px;display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+.precos-loja label{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--t70)}
+.precos-loja label span{min-width:62px;text-align:right}
+.precos-loja .pin{width:92px}
+.precos-loja .pin::placeholder{color:var(--t40);font-style:italic}
+.precos-loja label.difere span{color:#7A5410;font-weight:700}
+.precos-loja label.difere .pin{border-color:var(--mel)}
+
+.chips-loja{display:flex;flex-wrap:nowrap;gap:4px}
+/* Padrão (vende) = quase invisível. Exceção (não vende) = mel, riscado. */
+.adm .chip-loja{border:1px solid var(--fio);background:transparent;border-radius:999px;padding:4px 9px;cursor:pointer;
+  font-size:11.5px;font-weight:600;color:var(--t40);min-height:28px;white-space:nowrap;transition:background .12s,border-color .12s}
+.adm .chip-loja.on::before{content:'✓ ';color:var(--ok)}
+.adm .chip-loja.on:hover{border-color:var(--t40);color:var(--tinta)}
+.adm .chip-loja:not(.on){background:#FFF3DA;border-color:var(--mel);color:#7A5410;text-decoration:line-through;text-decoration-thickness:1.5px}
+.adm .chip-loja.mudou{outline:2px solid var(--mel);outline-offset:1px}
+.adm .chip-loja:focus-visible{outline:2px solid var(--forno);outline-offset:2px}
+.adm .chip-loja:disabled{cursor:default}
+.alerta-mini{margin-top:6px;font-size:11px;font-weight:600;color:var(--geleia);max-width:140px;line-height:1.35}
+
+/* Quadro "Diferenças entre lojas" no painel */
+.falta.difs{border-left:3px solid var(--mel)}
+.falta.difs li .n{font-size:11px}
+.falta.difs li a{font-weight:600;color:var(--tinta)}
+.falta.difs li i{font-style:normal;font-size:11px;color:var(--t40)}
+.falta.difs li.preco .n{background:#FFF3DA;color:#7A5410}
+
+/* Vitrine e Lojas */
+.onde{display:flex !important;align-items:center;gap:10px;margin:4px 0 14px !important}
+.onde select{width:auto !important;margin:0 !important;min-width:220px}
+.loja-slug{font-family:'Archivo',sans-serif;font-size:12px;font-weight:600;color:var(--t40);margin-left:6px}
+.vit-bloco > p.s a{color:var(--forno);font-weight:600}

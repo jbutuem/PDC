@@ -8,12 +8,25 @@ import { salvarComunicado, salvarPromocao, alternarPromocao } from './acoes';
 
 const reais = c => (c == null ? '' : (c / 100).toFixed(2).replace('.', ','));
 
+/** Seletor "aparece em": vazio = nas duas lojas. */
+function OndeAparece({ lojas, valor, aoMudar, desabilitado }) {
+  if (lojas.length < 2) return null;
+  return (
+    <label className="onde">Aparece em
+      <select value={valor ?? ''} disabled={desabilitado} onChange={e => aoMudar(e.target.value || null)}>
+        <option value="">{lojas.length === 2 ? 'Nas duas lojas' : 'Em todas as lojas'}</option>
+        {lojas.map(l => <option key={l.id} value={l.id}>Só no {l.nome}</option>)}
+      </select>
+    </label>
+  );
+}
+
 function Aviso({ msg }) {
   if (!msg) return null;
   return <div className={`aviso-adm ${msg.tipo}`}>{msg.texto}</div>;
 }
 
-export default function Editor({ hero, comunicado, promocoes, urlBase, podeEditar }) {
+export default function Editor({ hero, comunicado, promocoes, lojas = [], urlBase, podeEditar }) {
   const router = useRouter();
   const [msg, setMsg] = useState(null);
   const [salvando, setSalvando] = useState(null);
@@ -22,11 +35,13 @@ export default function Editor({ hero, comunicado, promocoes, urlBase, podeEdita
     chamada: hero?.chamada ?? '',
     titulo: hero?.titulo ?? '',
     linha_apoio: hero?.linha_apoio ?? '',
-    alt: hero?.alt ?? ''
+    alt: hero?.alt ?? '',
+    loja_id: hero?.loja_id ?? null
   });
   const [c, setC] = useState({
     texto: comunicado?.texto ?? '',
-    ativo: comunicado?.ativo ?? false
+    ativo: comunicado?.ativo ?? false,
+    loja_id: comunicado?.loja_id ?? null
   });
   const [ps, setPs] = useState(() =>
     promocoes.map(p => ({
@@ -69,13 +84,13 @@ export default function Editor({ hero, comunicado, promocoes, urlBase, podeEdita
             <div className="vit-previa">
               <img src={`${urlBase}/${hero.storage_path}`} alt="" />
               <div className="vit-previa-txt">
-                <b>{h.chamada || 'DESDE 1999, NO CAMBUÍ'}</b>
-                <strong>{h.titulo || 'Pão da Primavera'}</strong>
+                <b>{h.chamada || 'DESDE 1994 · DESDE 1999'}</b>
+                <strong>{h.titulo || 'Nome da loja'}</strong>
                 <span>{h.linha_apoio}</span>
               </div>
             </div>
             <div className="vit-campos">
-              <label>Chamada <i>etiqueta curta em cima do título</i>
+              <label>Chamada <i>vazio = “Desde 1994” no Cambuí e “Desde 1999” na Primavera</i>
                 <input value={h.chamada} maxLength={40} disabled={!podeEditar}
                        onChange={e => setH({ ...h, chamada: e.target.value })} />
               </label>
@@ -91,6 +106,8 @@ export default function Editor({ hero, comunicado, promocoes, urlBase, podeEdita
                 <input value={h.alt} maxLength={120} disabled={!podeEditar}
                        onChange={e => setH({ ...h, alt: e.target.value })} />
               </label>
+              <OndeAparece lojas={lojas} valor={h.loja_id} desabilitado={!podeEditar}
+                           aoMudar={v => setH({ ...h, loja_id: v })} />
               <div className="adm-acoes">
                 <button className="bt p" disabled={!podeEditar || salvando === 'hero'}
                         onClick={() => correr('hero', () => salvarTextoHero(hero.id, h))}>
@@ -123,6 +140,8 @@ export default function Editor({ hero, comunicado, promocoes, urlBase, podeEdita
                  onChange={e => setC({ ...c, ativo: e.target.checked })} />
           Mostrar no site
         </label>
+        <OndeAparece lojas={lojas} valor={c.loja_id} desabilitado={!podeEditar}
+                     aoMudar={v => setC({ ...c, loja_id: v })} />
         <div className="adm-acoes">
           <button className="bt p" disabled={!podeEditar || salvando === 'com'}
                   onClick={() => correr('com', () => salvarComunicado(c))}>
@@ -183,6 +202,8 @@ export default function Editor({ hero, comunicado, promocoes, urlBase, podeEdita
                          onChange={e => mudarP(i, 'observacao', e.target.value)} />
                 </label>
               </div>
+              <OndeAparece lojas={lojas} valor={p.loja_id} desabilitado={!podeEditar}
+                           aoMudar={v => mudarP(i, 'loja_id', v)} />
               <div className="adm-acoes">
                 <button className="bt p" disabled={!podeEditar || salvando === p.id}
                         onClick={() => correr(p.id, () => salvarPromocao(p.id, p))}>

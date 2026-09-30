@@ -44,6 +44,31 @@ export default async function Painel() {
   const { data: todasImagens } = await sb
     .from('imagens').select('papel').eq('tenant_id', s.membro.tenant_id);
 
+  // Diferenças entre lojas: tudo que foge do "vende nas duas pelo mesmo preço".
+  const [{ data: lojas }, { data: foraDaLoja }, { data: precosProprios }] = await Promise.all([
+    sb.from('lojas').select('id, nome').eq('tenant_id', s.membro.tenant_id).eq('ativo', true).order('ordem'),
+    sb.from('itens_lojas').select('loja_id, itens ( nome, codigo_pdv, secoes ( slug, nome ) )').eq('disponivel', false),
+    sb.from('precos')
+      .select('valor_centavos, loja_id, variantes ( id, rotulo, itens ( nome, codigo_pdv, secoes ( slug, nome ) ), precos ( valor_centavos, loja_id, vigencia_fim ) )')
+      .not('loja_id', 'is', null).is('vigencia_fim', null)
+  ]);
+  const nomeLoja = id => (lojas ?? []).find(l => l.id === id)?.nome ?? 'loja';
+  const reais = c => 'R$ ' + (c / 100).toFixed(2).replace('.', ',');
+  const diferencas = [
+    ...(foraDaLoja ?? []).filter(x => x.itens).map(x => ({
+      chave: `f${x.loja_id}${x.itens.codigo_pdv}`, item: x.itens, tipo: 'fora',
+      txt: <>não vende no <b>{nomeLoja(x.loja_id)}</b></>
+    })),
+    ...(precosProprios ?? []).filter(x => x.variantes?.itens).map(x => {
+      const base = (x.variantes.precos ?? []).find(p => !p.loja_id && !p.vigencia_fim)?.valor_centavos;
+      const rot = x.variantes.rotulo !== 'unica' ? ` (${x.variantes.rotulo})` : '';
+      return {
+        chave: `p${x.loja_id}${x.variantes.id}`, item: x.variantes.itens, tipo: 'preco',
+        txt: <><b>{reais(x.valor_centavos)}</b> no {nomeLoja(x.loja_id)}{rot}{base ? <> · base {reais(base)}</> : null}</>
+      };
+    })
+  ].sort((a, b) => a.item.nome.localeCompare(b.item.nome, 'pt-BR'));
+
   const itensTodos = (secoes ?? []).flatMap(x => x.itens ?? []);
   const totalItens = itensTodos.length;
   const nRascunho = rascunhos?.length ?? 0;
@@ -112,6 +137,30 @@ export default async function Painel() {
           );
         })}
       </div>
+
+      {(lojas ?? []).length > 1 && (
+        <div className="falta difs">
+          <h2>Diferenças entre lojas</h2>
+          <p className="s">
+            {diferencas.length === 0
+              ? 'Nenhuma. Todos os itens valem nas duas lojas pelo mesmo preço.'
+              : `Tudo que não é igual entre ${(lojas ?? []).map(l => l.nome).join(' e ')}. O resto do cardápio é idêntico.`}
+          </p>
+          {diferencas.length > 0 && (
+            <ul>
+              {diferencas.map(d => (
+                <li key={d.chave} className={d.tipo}>
+                  <span className="n">{d.tipo === 'fora' ? '—' : 'R$'}</span>
+                  <span>
+                    <Link href={`/admin/secoes/${d.item.secoes?.slug}`}>{d.item.nome}</Link>
+                    {d.item.codigo_pdv ? <i> {d.item.codigo_pdv}</i> : null}: {d.txt}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <div className="falta">
         <h2>O que falta</h2>

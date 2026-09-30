@@ -1,48 +1,45 @@
-import Menu from '@/components/Menu';
-import { carregarMenu, carregarComunicado, carregarVitrine } from '@/lib/menu';
+import Logo from '@/components/Logo';
+import { carregarLojas, carregarVitrine } from '@/lib/menu';
 
-// ISR: a página é estática no CDN e só é regerada quando a publicação
-// chama /api/revalidate. O revalidate de 1h é apenas uma rede de segurança.
 export const revalidate = 3600;
 
-export async function generateMetadata() {
-  const { hero } = await carregarVitrine();
-  const descricao =
-    'Cardápio completo do salão da Pão da Primavera Boulangerie, no Cambuí, ' +
-    'em Campinas. Padaria, cafeteria, almoço, pizzas e sanduíches.';
+export const metadata = {
+  title: 'Cardápio — Pão do Cambuí e Pão da Primavera',
+  description: 'Escolha a padaria para ver o cardápio do salão: Pão do Cambuí (desde 1994) ou Pão da Primavera (desde 1999), em Campinas.'
+};
 
-  return {
-    title: 'Cardápio — Pão da Primavera Boulangerie',
-    description: descricao,
-    openGraph: {
-      title: 'Cardápio — Pão da Primavera',
-      description: descricao,
-      type: 'website',
-      locale: 'pt_BR',
-      images: hero?.img
-        ? [{ url: hero.img, width: hero.largura ?? undefined,
-             height: hero.altura ?? undefined, alt: hero.alt }]
-        : []
-    }
-  };
-}
-
-export default async function Pagina() {
-  // Uma volta só ao banco por render. Antes eram três chamadas em série.
-  const [{ secoes, origem }, comunicado, { hero, promos }] = await Promise.all([
-    carregarMenu(),
-    carregarComunicado(),
-    carregarVitrine()
-  ]);
+/**
+ * Porta de entrada. O QR code da mesa deve apontar direto para /cambui ou
+ * /primavera — esta página existe para quem chega pelo link geral.
+ */
+export default async function Escolha() {
+  const lojas = await carregarLojas();
+  const { hero } = await carregarVitrine(lojas[0]);
 
   return (
-    <>
-      {origem === 'seed' && (
-        <div className="tarja-seed">
-          Dados do seed local — o Supabase ainda não está conectado a este deploy.
+    <main className="escolha">
+      <section className="escolha-foto rasgado" aria-hidden="true">
+        {hero?.img && <img src={hero.img} alt="" fetchPriority="high" style={{ objectPosition: hero.foco }} />}
+      </section>
+
+      <div className="escolha-corpo">
+        <p className="kick">CARDÁPIO DO SALÃO</p>
+        <h1>Em qual padaria você está?</h1>
+
+        <div className="casas">
+          {lojas.map(l => (
+            <a key={l.slug} href={`/${l.slug}`} className="casa">
+              <Logo loja={l} />
+              <span className="casa-ir">Ver o cardápio <span aria-hidden="true">→</span></span>
+            </a>
+          ))}
         </div>
-      )}
-      <Menu secoes={secoes} promos={promos} comunicado={comunicado} hero={hero} />
-    </>
+
+        <p className="escolha-nota">
+          As duas casas têm quase o mesmo cardápio, mas alguns preços e itens variam.
+          Escolha a padaria onde você está para ver os valores certos.
+        </p>
+      </div>
+    </main>
   );
 }
