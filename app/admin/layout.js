@@ -13,9 +13,10 @@ export default async function LayoutAdmin({ children }) {
     <div className="adm">
       {s?.user && (
         <header className="adm-barra">
-          <Link href="/admin" className="logo">Cardápio · Cambuí &amp; Primavera</Link>
+          <Link href="/admin" className="adm-marca">Cardápio · Cambuí &amp; Primavera</Link>
           <nav>
             <Link href="/admin">Cardápio</Link>
+            <Link href="/admin/fotos">Fotos</Link>
             <Link href="/admin/vitrine">Vitrine</Link>
             <Link href="/admin/imagens">Imagens</Link>
             <Link href="/admin/publicar">Publicar</Link>

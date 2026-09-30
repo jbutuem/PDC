@@ -12,7 +12,39 @@ async function exigir(papeis) {
 function atualizarPaginas() {
   revalidatePath('/admin/imagens');
   revalidatePath('/admin/vitrine');
+  revalidatePath('/admin/fotos');
   revalidatePath('/', 'layout');
+}
+
+/**
+ * Remove arquivos do bucket `menu`.
+ *
+ * No Storage, apagar é só da agência e do administrador. Mas quem troca a foto
+ * de um item pelo celular costuma ser o `cliente_editor` — com a sessão dele a
+ * remoção falhava em silêncio e a foto antiga ficava no bucket para sempre.
+ * Por isso a remoção usa a service_role. É seguro porque só chega aqui depois
+ * de `exigir(PODE_EDITAR)` e os caminhos vêm do banco (ou do upload que a
+ * própria pessoa acabou de fazer, conferido em `descartarArquivo`).
+ */
+async function removerDoStorage(caminhos, sbUsuario) {
+  const lista = (caminhos ?? []).filter(Boolean);
+  if (!lista.length) return;
+  let sb = sbUsuario;
+  try { sb = supabaseAdmin(); } catch { /* sem service_role: tenta com a sessão */ }
+  await sb.storage.from('menu').remove(lista).catch(() => {});
+}
+
+/**
+ * Apaga um upload recém-feito que não chegou a ser registrado. O caminho vem
+ * do navegador, então só sai se for um arquivo solto numa das pastas do
+ * cardápio e nenhuma imagem cadastrada o usar — nada que esteja no ar.
+ */
+async function removerSeSolto(caminho, sbUsuario) {
+  if (!caminho || !/^(produto|promo|hero|destaque)\/[\w.-]+$/.test(caminho)) return false;
+  const { data: usado } = await sbUsuario.from('imagens').select('id').eq('storage_path', caminho).limit(1);
+  if (usado?.length) return false;
+  await removerDoStorage([caminho], sbUsuario);
+  return true;
 }
 
 /**
@@ -61,7 +93,7 @@ export async function registrarImagem(dados) {
   // Falhou o registro: o arquivo já está no Storage e não pertence a ninguém.
   // Removê-lo aqui é o que impede o bucket de virar depósito de lixo.
   if (error) {
-    await sb.storage.from('menu').remove([dados.storage_path]).catch(() => {});
+    await removerSeSolto(dados.storage_path, sb);
     throw new Error(error.message);
   }
 
@@ -69,9 +101,8 @@ export async function registrarImagem(dados) {
   // o cardápio continua mostrando a foto velha em vez de um buraco.
   if (anteriores.length) {
     const ids = anteriores.map(a => a.id);
-    const caminhos = anteriores.map(a => a.storage_path).filter(Boolean);
     await sb.from('imagens').delete().in('id', ids);
-    if (caminhos.length) await sb.storage.from('menu').remove(caminhos);
+    await removerDoStorage(anteriores.map(a => a.storage_path), sb);
   }
 
   atualizarPaginas();
@@ -82,8 +113,7 @@ export async function registrarImagem(dados) {
 export async function descartarArquivo(caminho) {
   const s = await exigir(PODE_EDITAR);
   if (!caminho) return { ok: true };
-  await s.sb.storage.from('menu').remove([caminho]);
-  return { ok: true };
+  return { ok: await removerSeSolto(caminho, s.sb) };
 }
 
 export async function moverFoco(id, x, y) {
@@ -97,8 +127,12 @@ export async function moverFoco(id, x, y) {
 
 export async function apagarImagem(id, caminho) {
   const s = await exigir(PODE_PUBLICAR);
-  await s.sb.from('imagens').delete().eq('id', id);
-  if (caminho) await s.sb.storage.from('menu').remove([caminho]);
+  // O caminho vem do registro, não do navegador.
+  const { data: reg } = await s.sb.from('imagens').select('storage_path').eq('id', id).maybeSingle();
+  const { error } = await s.sb.from('imagens').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+  if (reg?.storage_path) await removerDoStorage([reg.storage_path], s.sb);
+  void caminho; // mantido na assinatura por compatibilidade com quem já chama
   atualizarPaginas();
   return { ok: true };
 }

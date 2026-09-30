@@ -116,6 +116,21 @@ export default async function Painel() {
       )}
 
 
+      {podeEditar && (
+        <Link href="/admin/fotos" className="cta-fotos">
+          <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" fill="none" stroke="currentColor"
+               strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 8h3l1.6-2.4A1.5 1.5 0 0 1 9.9 5h4.2a1.5 1.5 0 0 1 1.3.6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" />
+            <circle cx="12" cy="13" r="3.6" />
+          </svg>
+          <div>
+            <b>Fotos pelo celular</b>
+            <span>{semFoto ? `${semFoto} itens ainda sem foto. Escolha o item, tire a foto e envie.` : 'Todos os itens têm foto. Troque quando quiser.'}</span>
+          </div>
+          <i aria-hidden="true">›</i>
+        </Link>
+      )}
+
       <div className="adm-grade">
         {(secoes ?? []).map(sec => {
           const total = sec.itens?.length ?? 0;
@@ -174,6 +189,7 @@ export default async function Painel() {
           ))}
         </ul>
         <div className="adm-acoes" style={{ marginTop: 14 }}>
+          <Link href="/admin/fotos" className="bt p">Tirar fotos dos itens</Link>
           <Link href="/admin/imagens" className="bt s">Hero, destaques e promoções</Link>
           <Link href="/" target="_blank" className="bt g">Ver o cardápio no ar ↗</Link>
         </div>

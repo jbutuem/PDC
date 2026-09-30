@@ -15,7 +15,7 @@
 /* ---------- barra ---------- */
 .adm-barra{background:var(--tinta);color:var(--branco);padding:11px 20px;
   display:flex;align-items:center;gap:18px;position:sticky;top:0;z-index:50;flex-wrap:wrap}
-.adm-barra .logo{font-family:'Fraunces',serif;font-size:17px;font-weight:600;
+.adm-barra .adm-marca{font-family:'Fraunces',serif;font-size:17px;font-weight:600;
   text-decoration:none;white-space:nowrap}
 .adm-barra nav{display:flex;gap:16px;font-size:13.5px}
 .adm-barra nav a{opacity:.7;text-decoration:none;padding-bottom:2px;
@@ -347,3 +347,129 @@ textarea.campo{min-height:52px;resize:vertical;line-height:1.4}
 .onde select{width:auto !important;margin:0 !important;min-width:220px}
 .loja-slug{font-family:'Archivo',sans-serif;font-size:12px;font-weight:600;color:var(--t40);margin-left:6px}
 .vit-bloco > p.s a{color:var(--forno);font-weight:600}
+
+/* =====================================================================
+   FOTOS PELO CELULAR — uma coisa por tela, alvos de toque grandes,
+   ações presas no rodapé ao alcance do polegar.
+   ===================================================================== */
+.fc{max-width:620px;margin:0 auto;padding:18px 16px 60px}
+.fc-titulo{font-family:'Fraunces',serif;font-size:30px;font-weight:600;margin:0;letter-spacing:-.02em;line-height:1.05}
+.fc-sub{color:var(--t70);font-size:14px;margin:6px 0 16px;line-height:1.45}
+
+.fc-progresso{background:var(--branco);border:1px solid var(--fio);border-radius:6px;padding:12px 14px;
+  font-size:13.5px;color:var(--t70)}
+.fc-progresso b{color:var(--tinta);font-size:17px;font-variant-numeric:tabular-nums}
+.fc-barra{height:5px;background:var(--pedra);border-radius:3px;margin-top:8px;overflow:hidden}
+.fc-barra i{display:block;height:100%;background:var(--mel);border-radius:3px}
+
+.fc-busca{position:sticky;top:0;z-index:30;background:var(--papel);margin:0 -16px;padding:12px 16px 10px;
+  border-bottom:1px solid transparent}
+.fc-busca input{width:100%;padding:12px 14px;border:1px solid var(--pedra);border-radius:8px;background:#fff;
+  font-size:16px;-webkit-appearance:none;appearance:none}
+.fc-busca input:focus{outline:2px solid var(--forno);outline-offset:-1px;border-color:var(--forno)}
+.fc-filtros{display:flex;gap:6px;margin-top:10px;overflow-x:auto;scrollbar-width:none}
+.adm .fc-filtros button{border:1px solid var(--fio);background:var(--branco);border-radius:999px;padding:8px 14px;
+  font-size:13.5px;font-weight:600;color:var(--t70);cursor:pointer;white-space:nowrap;min-height:38px}
+.adm .fc-filtros button span{color:var(--t40);font-variant-numeric:tabular-nums;margin-left:2px}
+.adm .fc-filtros button.on{background:var(--tinta);border-color:var(--tinta);color:var(--branco)}
+.adm .fc-filtros button.on span{color:rgba(251,247,242,.6)}
+
+.fc-sec{margin-top:18px}
+.fc-sec h2{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--forno);margin:0 0 6px}
+.fc-sec ul{list-style:none;margin:0;padding:0;background:var(--branco);border:1px solid var(--fio);border-radius:8px;overflow:hidden}
+.fc-sec li + li{border-top:1px solid var(--fio)}
+.adm .fc-linha{display:flex;align-items:center;gap:12px;width:100%;min-height:68px;padding:9px 12px;
+  background:none;border:0;text-align:left;cursor:pointer}
+.adm .fc-linha:active{background:#F6F0E8}
+.fc-thumb{width:50px;height:50px;border-radius:6px;overflow:hidden;flex:0 0 auto;background:var(--pedra);
+  display:flex;align-items:center;justify-content:center}
+.fc-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.fc-thumb.vazio{color:var(--t40);border:1px dashed var(--pedra);
+  background:repeating-linear-gradient(135deg,#EDE4D8,#EDE4D8 6px,#F5EEE5 6px,#F5EEE5 12px)}
+.fc-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.fc-txt b{font-size:15px;font-weight:600;line-height:1.25}
+.fc-txt small{font-size:12px;color:var(--t40)}
+.fc-seta{font-size:24px;color:var(--t40);line-height:1;padding-left:4px}
+.fc-nada{margin:28px 0;text-align:center;color:var(--t70);font-size:14px}
+
+/* ---- tela do item: camada cheia, como um app ---- */
+.fc-camada{position:fixed;inset:0;z-index:70;overflow-y:auto;background:var(--papel);
+  overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.fc-item{padding-top:6px;padding-bottom:190px}
+.fc-topo{position:sticky;top:0;z-index:2;background:rgba(240,231,220,.96);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--fio);
+  padding-top:env(safe-area-inset-top)}
+.fc-topo-in{max-width:620px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.adm .fc-voltar{background:none;border:0;padding:12px 12px 12px 0;font-size:16px;font-weight:700;color:var(--forno);
+  cursor:pointer;min-height:48px;display:flex;align-items:center;gap:6px}
+.fc-secao{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t40);
+  text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fc-nome{font-family:'Fraunces',serif;font-size:25px;font-weight:600;margin:10px 0 0;line-height:1.12;letter-spacing:-.015em}
+.fc-cod{margin:3px 0 0;font-size:12.5px;color:var(--t40);font-variant-numeric:tabular-nums}
+
+.fc-palco{margin-top:12px;background:var(--tinta);border-radius:10px;display:flex;justify-content:center;
+  align-items:center;min-height:180px;overflow:hidden}
+.fc-quadro{position:relative;display:inline-block;line-height:0;cursor:crosshair;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent}
+.fc-quadro img{display:block;max-width:100%;max-height:44vh;width:auto;height:auto;user-select:none;-webkit-user-select:none}
+.fc-alvo{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border:2.5px solid #fff;border-radius:50%;
+  box-shadow:0 0 0 2px rgba(0,0,0,.45),inset 0 0 0 2px rgba(0,0,0,.25);pointer-events:none;transition:left .15s,top .15s}
+.fc-alvo::after{content:'';position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;
+  border-radius:50%;background:#fff}
+.fc-veu{position:absolute;inset:0;background:rgba(51,41,31,.72);color:#fff;display:flex;align-items:center;
+  justify-content:center;gap:10px;font-size:14px;font-weight:600;line-height:1.2}
+
+.fc-vazio{margin-top:12px;aspect-ratio:4/3;max-height:44vh;width:100%;border:1.5px dashed var(--pedra);border-radius:10px;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:20px;color:var(--t40);
+  background:repeating-linear-gradient(135deg,#EDE4D8,#EDE4D8 9px,#F3ECE2 9px,#F3ECE2 18px)}
+.fc-vazio svg{width:38px;height:38px}
+.fc-vazio b{color:var(--tinta);font-size:15px}
+.fc-vazio span{font-size:13px;max-width:280px;line-height:1.4}
+
+.fc-assim{display:flex;gap:12px;align-items:center;margin-top:10px;padding:10px 12px;background:var(--branco);
+  border:1px solid var(--fio);border-radius:10px}
+.fc-mini{width:64px;height:64px;border-radius:5px;overflow:hidden;flex:0 0 auto;background:var(--pedra)}
+.fc-mini img{width:100%;height:100%;object-fit:cover;display:block}
+.fc-assim b{display:block;font-size:13px}
+.fc-assim span{display:block;font-size:12.5px;color:var(--t70);line-height:1.35;margin-top:1px}
+.fc-assim small{display:block;font-size:11.5px;color:var(--t40);margin-top:4px}
+.fc-aviso{margin:12px 0 0}
+.adm .fc-remover{margin-top:14px;background:none;border:0;padding:8px 0;font-size:13.5px;font-weight:600;
+  color:var(--geleia);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+.fc-acoes{position:fixed;left:0;right:0;bottom:0;z-index:3;background:rgba(240,231,220,.97);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid var(--fio);
+  padding:10px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -8px 20px -16px rgba(51,41,31,.6)}
+.fc-acoes-in{max-width:620px;margin:0 auto}
+.fc-estado{margin:0 0 10px;font-size:14px;color:var(--t70);line-height:1.35;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fc-estado s{color:var(--t40)}
+.fc-estado b{color:var(--tinta)}
+.fc-estado em{font-style:normal;font-weight:700;font-size:11.5px;color:#2E5222;background:#DCEAD4;border-radius:999px;padding:2px 8px}
+.fc-estado.ok{background:#DCEAD4;color:#2E5222;border-radius:8px;padding:10px 12px}
+.fc-estado.ok b{color:#2E5222}
+.fc-estado.erro{background:#FBE9EC;color:#7A2A36;border-radius:8px;padding:10px 12px;font-weight:600}
+.fc-bts{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:10px}
+.adm .fc-bt{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;
+  padding:0 12px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;border:1.5px solid var(--tinta);
+  text-align:center;line-height:1.15;-webkit-tap-highlight-color:transparent;user-select:none;white-space:nowrap}
+.adm .fc-bt.p{background:var(--forno);border-color:var(--forno);color:#fff}
+.adm .fc-bt.p:active{background:#7C3719}
+.adm .fc-bt.s{background:var(--branco);color:var(--tinta)}
+.adm .fc-bt.ocupado,.adm .fc-bt:disabled{opacity:.7;pointer-events:none}
+.fc-bt input[type=file]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.fc-bt:has(input:focus-visible){outline:3px solid var(--mel);outline-offset:2px}
+.girando.claro{border-color:rgba(255,255,255,.35);border-top-color:#fff}
+
+/* Atalho no painel */
+.adm .cta-fotos{display:flex;align-items:center;gap:14px;background:var(--tinta);color:var(--branco);border-radius:8px;
+  padding:14px 16px;margin:0 0 20px;text-decoration:none}
+.cta-fotos svg{flex:0 0 auto;color:var(--mel)}
+.cta-fotos b{display:block;font-size:15.5px}
+.cta-fotos span{display:block;font-size:12.5px;opacity:.75;margin-top:1px}
+.cta-fotos i{margin-left:auto;font-style:normal;font-size:22px;opacity:.7}
+
+@media (max-width:640px){
+  /* No celular a barra do topo rola junto: o espaço da tela é do trabalho. */
+  .adm-barra{position:static}
+}
+@media (min-width:641px){ .fc-busca{position:relative} }
